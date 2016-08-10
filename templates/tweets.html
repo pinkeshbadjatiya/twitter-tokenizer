@@ -1,0 +1,41 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>Tweets from {{ filename }}</title>
+<style>
+  body {
+    margin:40px;
+  }
+  table, tr, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  tr, td {
+    padding: 10px;
+  }
+  table {
+      border-spacing: 5px;
+  }
+</style>
+<body>
+  <h1> Twitter Tokeniser </h1>
+  <table>
+    <tr>
+      <th>Tweet</th>
+      <th>Glyphs</th>
+      <th>Handles</th>
+      <th>Hashtags</th>
+      <th>URLs</th>
+      <th>Other Unicodes</th>
+    </tr>
+    {% for t in tweets %}
+      <tr>
+        <td>{{ t.tweet }}</td>
+        <td>{% for glyp in t.glyphs %} {{ glyp }} {% endfor %}</td>
+        <td>{% for handle in t.handles %} {{ handle }} {% endfor %}</td>
+        <td>{% for hashtag in t.hashtags %} {{ hashtag }} {% endfor %}</td>
+        <td>{% for url in t.urls %} {{ url }} {% endfor %}</td>
+        <td>{% for unicode in t.unicodes %} {{ unicode }} {% endfor %}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</body>
