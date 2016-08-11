@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset=utf-8>
+<html>
+  <head>
+    {% block head %}
+    <title>Twitter Tokenizer</title>
+    <style>
+      body {
+        margin:40px;
+      }
+      table, tr, td, th {
+        border: 1px solid black;
+        border-collapse: collapse;
+        border-radius: 10px;
+      }
+      tr, td, th {
+        padding: 10px;
+      }
+      table {
+          border-spacing: 5px;
+      }
+      th {
+        font-size: 20px;
+      }
+      .token {
+        color:red;
+        font-weight: bold;
+      }
+      pre {
+        font-size: 16px;
+      }
+    </style>
+    {% endblock %}
+  </head>
+  <body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+      {% block footer %}
+      &copy; Copyright 2010 by <a href="/">Pinkesh Badjatiya</a>.
+      {% endblock %}
+    </div>
+  </body>
+</html>

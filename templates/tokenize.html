@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1> Twitter Tokenizer ({{ filename }})</h1>
+<table>
+  <tr>
+    <th>Tweet</th>
+    <th>Tokens (one per line)</th>
+  </tr>
+  {% for t in tweets %}
+    <tr>
+      <td>{{ t.tweet }}</td>
+      <td>
+        <pre>{% for token in t.tokens %}<span class="token">{{ t.ReplacementDict.get(token, token) + "\n" }}</span>{% endfor %}</pre>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

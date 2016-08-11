@@ -6,7 +6,7 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
-class Tokeniser:
+class Tokenizer:
     def __init__(self, file_name):
         self.file_name = file_name
         self.regex_tweet_check = re.compile(r"^RT @[\w\d]+:")
@@ -26,17 +26,16 @@ class Tokeniser:
             tw += line
         self.tweets.append(Tweet(tw))
 
-
-def write_to_file(file_name, tweets):
-    with open(file_name, mode="w", encoding="utf8") as f:
-        for tweet in tweets:
-            print(tweet.tweet, file=f)
+# def write_to_file(file_name, tweets):
+#     with open(file_name, mode="w", encoding="utf8") as f:
+#         for tweet in tweets:
+#             print(tweet.tweet, file=f)
 
 
 @app.route("/")
 def main():
     filename = "tweets.en.txt"
-    t = Tokeniser(filename)
+    t = Tokenizer(filename)
     t.load_tweets()
 
     tweets = []
@@ -46,6 +45,7 @@ def main():
         tweet["glyphs"] = []
         tweet["unicodes"] = []
         tweet["handles"] = []
+        tweet["emails"] = []
         tweet["hashtags"] = []
         tweet["urls"] = []
 
@@ -56,20 +56,37 @@ def main():
                 tweet["unicodes"].append(v)
             elif re.match(r">!HAND\d!<", k):
                 tweet["handles"].append(v)
+            elif re.match(r">!EMAIL\d!<", k):
+                tweet["emails"].append(v)
             elif re.match(r">!HTAG\d!<", k):
                 tweet["hashtags"].append(v)
             elif re.match(r">!URL\d!<", k):
                 tweet["urls"].append(v)
         tweets.append(tweet)
 
-    # write_to_file("output_file.txt", t.tweets)
     return render_template('tweets.html', filename=filename, tweets=tweets)
 
 
-@app.route("/write")
-def write():
-    write_to_file("output_file.txt", t.tweets)
-    return "Success!"
+@app.route("/tokenize")
+def tokenize():
+    filename = "tweets.en.txt"
+    t = Tokenizer(filename)
+    t.load_tweets()
+
+    tweets = []
+    for t in t.tweets:
+        tweet = {}
+        tweet["tweet"] = t.origTweet
+        tweet["tokens"] = t.tokens
+        tweet["ReplacementDict"] = t.ReplacementDict
+        tweets.append(tweet)
+
+    return render_template('tokenize.html', filename=filename, tweets=tweets)
+
+# @app.route("/write")
+# def write():
+#     write_to_file("output_file.txt", t.tweets)
+#     return "Success!"
 
 if __name__ == "__main__":
     app.run()
