@@ -34,11 +34,13 @@ class Tokenizer:
 #             print(tweet.tweet, file=f)
 
 
-@app.route("/tweets")
+@app.route("/tweets//")
 @app.route("/tweets/<filename>")
 @app.route("/tweets/<filename>/<int:max_tweet_count>")
-def display_tweets(filename="tweets.en.txt", max_tweet_count=None):
-    # filename = "tweets.en.txt"
+def display_tweets(filename=None, max_tweet_count=None):
+    if not filename:
+        return redirect(url_for('display_tweets', filename="tweets.en.txt", max_tweet_count=max_tweet_count))
+
     t = Tokenizer(filename)
     t.load_tweets(max_tweet_count)
 
@@ -71,11 +73,15 @@ def display_tweets(filename="tweets.en.txt", max_tweet_count=None):
     return render_template('tweets.html', filename=filename, tweets=tweets)
 
 
-@app.route("/tokenize")
-def tokenize():
-    filename = "tweets.en.txt"
+@app.route("/tokenize//")
+@app.route("/tokenize/<filename>")
+@app.route("/tokenize/<filename>/<int:max_tweet_count>")
+def tokenize(filename=None, max_tweet_count=None):
+    if not filename:
+        return redirect(url_for('tokenize', filename="tweets.en.txt", max_tweet_count=max_tweet_count))
+
     t = Tokenizer(filename)
-    t.load_tweets()
+    t.load_tweets(max_tweet_count)
 
     tweets = []
     for t in t.tweets:
