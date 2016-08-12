@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import re
 from parse_tweet import Tweet, SUBSTITUTION_STARTING_CHAR, SUBSTITUTION_ENDING_CHAR
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 
 app = Flask(__name__)
 
@@ -12,7 +12,7 @@ class Tokenizer:
         self.regex_tweet_check = re.compile(r"^RT @[\w\d]+:")
         self.tweets = []
 
-    def load_tweets(self):
+    def load_tweets(self, max_tweet_count):
         with open(self.file_name, 'rb') as f:
             raw_tweets = f.readlines()
 
@@ -21,6 +21,8 @@ class Tokenizer:
             line = line.decode("utf-8")   # Very important especially for UNICODE chars
             if re.match(self.regex_tweet_check, line):
                 if tw != "":
+                    if max_tweet_count and len(self.tweets) >= max_tweet_count - 1:
+                        break
                     self.tweets.append(Tweet(tw))
                 tw = ""
             tw += line
@@ -32,11 +34,13 @@ class Tokenizer:
 #             print(tweet.tweet, file=f)
 
 
-@app.route("/")
-def main():
-    filename = "tweets.en.txt"
+@app.route("/tweets")
+@app.route("/tweets/<filename>")
+@app.route("/tweets/<filename>/<int:max_tweet_count>")
+def display_tweets(filename="tweets.en.txt", max_tweet_count=None):
+    # filename = "tweets.en.txt"
     t = Tokenizer(filename)
-    t.load_tweets()
+    t.load_tweets(max_tweet_count)
 
     tweets = []
     for t in t.tweets:
@@ -82,6 +86,12 @@ def tokenize():
         tweets.append(tweet)
 
     return render_template('tokenize.html', filename=filename, tweets=tweets)
+
+
+@app.route("/")
+def main():
+    return redirect(url_for('display_tweets'))
+
 
 # @app.route("/write")
 # def write():
