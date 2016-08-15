@@ -5,6 +5,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from collections import defaultdict
 import operator
 from copy import deepcopy
+import random
 
 app = Flask(__name__)
 
@@ -16,6 +17,10 @@ class Tokenizer:
         self.regex_tweet_check = re.compile(r"^RT @[\w\d]+:")
         self.tweets = []
         self.sentences = []
+        self.graph = {
+            "edges": defaultdict(list),
+            "weights": defaultdict(int)
+        }
 
     def load_tweets(self, max_tweet_count):
         with open(self.file_name, 'rb') as f:
@@ -62,6 +67,29 @@ class Tokenizer:
         if max_sentence_count and max_sentence_count != -1:
             self.sentences = self.sentences[:max_sentence_count]
 
+    def update_graph(self, n_gram, tokens):
+        siz = len(tokens)
+        dependency = n_gram - 1
+        for i in range(siz):
+            if i >= siz - 1:
+                continue
+            key = " ".join(tokens[i - dependency + 1: i + 1])
+            self.graph["edges"][key].append(tokens[i + 1])
+            self.graph["weights"][key + " " + tokens[i + 1]] += 1
+
+    def generate_sentence(self, n_gram, failures=0):
+        try:
+            sentence = ["<s>"]
+            dependency = n_gram - 1
+            while sentence[-1] != "</s>":
+                key = " ".join(sentence[-dependency:])
+                sentence.append(random.choice(self.graph["edges"][key]))
+            return {
+                "sentence": " ".join(sentence),
+                "failures": failures
+            }
+        except IndexError:
+            return self.generate_sentence(n_gram, failures + 1)
 
 # def write_to_file(file_name, tweets):
 #     with open(file_name, mode="w", encoding="utf8") as f:
@@ -132,6 +160,7 @@ def generate_statistics():
     filename = request.args.get("filename", "real_soldiers_of_fortune.txt")
     max_sentence_count = int(request.args.get("max_sentences", -1))
     n_gram = int(request.args.get("n_gram", 1))
+    generate_sentence = int(request.args.get("generate_sentence", 0))
 
     t = Tokenizer(filename)
     t.load_corpus(max_sentence_count)
@@ -156,6 +185,14 @@ def generate_statistics():
                 make_key = " ".join(tokens[start_ind: end_ind])
                 token_corpus[i][make_key] += 1
 
+            # For creating graph as linked_list
+            t.update_graph(n_gram, tokens)
+
+    if generate_sentence:
+        random_sentence = t.generate_sentence(n_gram)
+    else:
+        random_sentence = None
+
     # Sort by frequency
     corpus_stats = sorted(token_corpus[n_gram].items(), key=operator.itemgetter(1))
     corpus_stats.reverse()
@@ -166,7 +203,8 @@ def generate_statistics():
         sen = {}
         sen["token"] = k
         sen["freq"] = v
-        sen["probablity_ending"] = (token_corpus[n_gram + 1][k + " " + "</s>"] * 1.0)/token_corpus[1]["</s>"]
+        sen["probablity_ending"] = (token_corpus[n_gram + 1][k + " " + "</s>"] * 1.0)/token_corpus[n_gram][k]
+        # sen["probablity_ending"] = (token_corpus[n_gram + 1][k + " " + "</s>"] * 1.0)/token_corpus[1]["</s>"]
         result.append((sen, sen["probablity_ending"]))
 
     # Sort by probablity
@@ -174,7 +212,7 @@ def generate_statistics():
     result.reverse()
 
     return render_template('generate_statistics.html', filename=filename,
-                           result=result, n_gram=n_gram)
+                           result=result, n_gram=n_gram, sentence=random_sentence)
 
 @app.route("/")
 def main():

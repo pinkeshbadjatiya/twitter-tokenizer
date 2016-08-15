@@ -2,21 +2,17 @@
 {% block content %}
 <h1> Text-Corpus Tokenizer ({{ filename }})</h1>
 <h2> For: {{ n_gram }} gram</h2>
-<!-- <form action="/ngram_stats">
-  <select name="cars">
-    {% for word in words %}
-      <option value="{{word}}">{{word}}</option>
-    {% endfor %}
-  </select>
-  <br><br>
-  <input type="submit">
-</form> -->
+
+{% if sentence %}
+  <h4>{{ sentence["sentence"] }}</h4>
+  <p style="color:red; font-weight:bold;">after {{ sentence["failures"] }} failures</p>
+{% endif %}
 
 <table class="sortable">
   <tr>
     <th>Token</th>
     <th>Frequency</th>
-    <th>Prob (&lt;/s&gt; | :token:)</th>
+    <th>Prob (&lt;/s&gt; | :token:) = #(:token: &lt;/s&gt;) / #(:token:)</th>
   </tr>
   {% for (row, temp) in result %}
     <tr>
@@ -26,20 +22,4 @@
     </tr>
   {% endfor %}
 </table>
-
-
-<!-- <table>
-  <tr>
-    <th>Sentence</th>
-    <th>Tokens (one per line)</th>
-  </tr>
-  {% for t in tweets %}
-    <tr>
-      <td>{{ t.tweet }}</td>
-      <td>
-        <pre>{% for token in t.tokens %}<span class="token">{{ t.ReplacementDict.get(token, token) + "\n" }}</span>{% endfor %}</pre>
-      </td>
-    </tr>
-  {% endfor %}
-</table> -->
 {% endblock %}
