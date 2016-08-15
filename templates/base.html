@@ -4,6 +4,7 @@
   <head>
     {% block head %}
     <title>Twitter Tokenizer</title>
+    <!-- <script src="{{ url_for('static', filename='js/sorttable.js') }}"></script> -->
     <style>
       body {
         margin:40px;
@@ -29,6 +30,13 @@
       pre {
         font-size: 16px;
       }
+      /* Sortable tables */
+      table.sortable thead {
+          background-color:#eee;
+          color:#666666;
+          font-weight: bold;
+          cursor: default;
+      }
     </style>
     {% endblock %}
   </head>
@@ -36,7 +44,7 @@
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
       {% block footer %}
-      &copy; Copyright 2010 by <a href="/">Pinkesh Badjatiya</a>.
+      &copy; Copyright 2016 by <a href="/">Pinkesh Badjatiya</a>.
       {% endblock %}
     </div>
   </body>

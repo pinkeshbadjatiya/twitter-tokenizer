@@ -93,6 +93,9 @@ class Tweet(object):
         # Pad numbers with commas to keep them from further tokenization.
         COMMA_IN_NUM = re.compile(r'(?<!,)([,،])(?![,\d])'), r' \1 '
 
+        # "boy; yes true." -> "boy ; yes true"
+        SEPARATE_SEMICOLON = re.compile(r'([;]+)'), ' ;'
+
         # Replace non-breaking spaces with normal spaces.
         NON_BREAKING = re.compile(u"\u00A0"), " "
 
@@ -121,7 +124,7 @@ class Tweet(object):
         # Merge multiple spaces.
         ONE_SPACE = re.compile(r' {2,}'), ' '
 
-        self.TOKTOK_REGEXES = [COMMA_IN_NUM, NON_BREAKING, FINAL_PERIOD_1, FINAL_PERIOD_2,
+        self.TOKTOK_REGEXES = [COMMA_IN_NUM, SEPARATE_SEMICOLON, NON_BREAKING, FINAL_PERIOD_1, FINAL_PERIOD_2,
                                MULTI_DOTS, MULTI_DASHES, MULTI_COMMAS, LSTRIP, RSTRIP,
                                ONE_SPACE]
 
@@ -131,6 +134,7 @@ class Tweet(object):
 
         # Finally, strips heading and trailing spaces
         # and converts output string into unicode.
+        # The order of tokens is the same as in the original sentence
         tweet = text_type(tweet.strip())
         return tweet if getString else tweet.split()
 
