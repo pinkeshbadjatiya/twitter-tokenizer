@@ -103,17 +103,18 @@ class Tweet(object):
         # preceded by another period, e.g.
         # "something ..." -> "something ..."
         # "something." -> "something ."
-        FINAL_PERIOD_1 = re.compile(r"(?<!\.)\.$"), r" ."
+        FINAL_PERIOD_1 = re.compile(r"(?<!\.)\.[ $]"), r" . "
         # Don't tokenize period unless it ends the line eg.
         # " ... stuff." ->  "... stuff ."
         FINAL_PERIOD_2 = re.compile(r"""(?<!\.)\.\s*(["'’»›”]) *$"""), r" . \1"
 
         # Treat continuous commas as fake German,Czech, etc.: „
-        MULTI_COMMAS = re.compile(r'(,{2,})'), r' \1 '
-        # Treat continuous dashes as fake en-dash, etc.
-        MULTI_DASHES = re.compile(r'(-{2,})'), r' \1 '
-        # Treat multiple periods as a thing (eg. ellipsis)
-        MULTI_DOTS = re.compile(r'(\.{2,})'), r' \1 '
+        MULTI_COMMAS_DASHES_DOTS_EXCLAMATION = re.compile(r'([!,-\.]){2,}'), r' \1 '
+        # # Treat continuous dashes as fake en-dash, etc.
+        # MULTI_DASHES = re.compile(r'(-{2,})'), r' \1 '
+        # # Treat multiple periods as a thing (eg. ellipsis)
+        # MULTI_DOTS = re.compile(r'(\.{2,})'), r' \1 '
+
 
         # Left/Right strip, i.e. remove heading/trailing spaces.
         # These strip regexes should NOT be used,
@@ -125,12 +126,14 @@ class Tweet(object):
         ONE_SPACE = re.compile(r' {2,}'), ' '
 
         self.TOKTOK_REGEXES = [COMMA_IN_NUM, SEPARATE_SEMICOLON, NON_BREAKING, FINAL_PERIOD_1, FINAL_PERIOD_2,
-                               MULTI_DOTS, MULTI_DASHES, MULTI_COMMAS, LSTRIP, RSTRIP,
+                               MULTI_COMMAS_DASHES_DOTS_EXCLAMATION, LSTRIP, RSTRIP,
                                ONE_SPACE]
 
         tweet = text_type(tweet)  # Converts input string into unicode.
         for regexp, subsitution in self.TOKTOK_REGEXES:
             tweet = regexp.sub(subsitution, tweet)
+            # print(tweet)
+        # import pdb; pdb.set_trace()
 
         # Finally, strips heading and trailing spaces
         # and converts output string into unicode.
@@ -194,10 +197,11 @@ class Tweet(object):
         replacements = []
         def replace_attr(matchobj):
             nonlocal replace_pattern, replacements
+            object_of_importance = matchobj.group(0)[1:]
             self.__count[replace_pattern] += 1
             substitution = SUBSTITUTION_STARTING_CHAR + replace_pattern + str(self.__count[replace_pattern]) + SUBSTITUTION_ENDING_CHAR
-            self.ReplacementDict[substitution] = matchobj.group(0)
-            replacements.append(matchobj.group(0))
+            self.ReplacementDict[substitution] = object_of_importance
+            replacements.append(object_of_importance)
             return substitution
 
         return re.sub(TWITTER_HANDLE_regex, replace_attr, tweet), replacements

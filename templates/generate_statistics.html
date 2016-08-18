@@ -4,8 +4,12 @@
 <h2> For: {{ n_gram }} gram</h2>
 
 {% if sentence %}
+  <hr/>
+  <p> Sentence generation type: <span style="color:red; font-weight:bold;">{{ sentence["generate_type"] }}</span> </p>
   <h4>{{ sentence["sentence"] }}</h4>
   <p style="color:red; font-weight:bold;">after {{ sentence["failures"] }} failures</p>
+  <hr/>
+  <br/>
 {% endif %}
 
 <table class="sortable">
